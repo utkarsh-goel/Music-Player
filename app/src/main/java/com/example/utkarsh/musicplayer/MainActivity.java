@@ -108,8 +108,8 @@ public class MainActivity extends AppCompatActivity {
     {
         @Override
         public void run() {
-            while(true)
-            {
+            while (true) {
+
                 try
                 {
                     Thread.sleep(1000);
@@ -118,26 +118,31 @@ public class MainActivity extends AppCompatActivity {
                 {
                     e.printStackTrace();
                 }
-                Log.d("Runwa","run: "+1);
-                if(mediaPlayer!=null)
+                Log.d("Runwa", "run: " + 1);
+                if (mediaPlayer != null)
                 {
-                    seekBar.post(new Runnable() {
+                    seekBar.post(new Runnable()
+                    {
                         @Override
-                        public void run() {
+                        public void run()
+                        {
                             seekBar.setProgress(mediaPlayer.getCurrentPosition());
                         }
                     });
+
                     Log.d("Runwa", "run: " + mediaPlayer.getCurrentPosition());
                 }
             }
         }
+
     }
 
-    private void checkUserPermission()
-    {
-        if(Build.VERSION.SDK_INT>22)
-        {
-            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED)
+
+    private void checkUserPermission(){
+        //Marshmallow and above exception
+        if(Build.VERSION.SDK_INT>=23){
+            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED)
             {
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},123);
                 return;
@@ -146,53 +151,54 @@ public class MainActivity extends AppCompatActivity {
         loadSongs();
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode)
         {
             case 123:
-                if(grantResults[0]==PackageManager.PERMISSION_GRANTED)
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 {
                     loadSongs();
                 }
                 else
                 {
-                    Toast.makeText(this, "PERMISSION DENIED",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
                     checkUserPermission();
                 }
                 break;
 
-
-            default:
+                default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         }
+
     }
 
-    private void loadSongs() {
+
+    private void loadSongs(){
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        String selection = MediaStore.Audio.Media.IS_MUSIC+"!0";
+        String selection = MediaStore.Audio.Media.IS_MUSIC+"!=0";
         Cursor cursor = getContentResolver().query(uri,null,selection,null,null);
-        if(cursor!=null)
+
+        if(cursor != null)
         {
             if(cursor.moveToFirst())
             {
                 do
-                    {
+                {
                     String name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
                     String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
                     String url = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
 
-                    SongInfo s = new SongInfo(name, artist, url);
+                    SongInfo s = new SongInfo(name,artist,url);
                     _songs.add(s);
+
                 }while (cursor.moveToNext());
             }
 
             cursor.close();
             songAdapter = new SongAdapter(MainActivity.this,_songs);
-            }
         }
     }
-
+}
 
